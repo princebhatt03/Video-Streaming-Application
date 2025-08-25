@@ -3,19 +3,24 @@ const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
-const path = require('path');
 const MongoStore = require('connect-mongo');
-const flash = require('express-flash');
-const fs = require('fs');
 const http = require('http');
 const { Server } = require('socket.io');
 const connectToDb = require('./db/db');
+
+// Routes
 const userRoutes = require('./routes/user.routes');
 const adminRoutes = require('./routes/admin.routes');
+const streamRoutes = require('./routes/stream.routes');
 
+// ---------------- DB Connection ----------------
 connectToDb();
+
+// ---------------- Express App ----------------
 const app = express();
 const server = http.createServer(app);
+
+// ---------------- Socket.IO ----------------
 const io = new Server(server, {
   cors: {
     origin: process.env.FRONTEND_URL || 'http://localhost:5173',
@@ -25,67 +30,80 @@ const io = new Server(server, {
 
 app.set('io', io);
 
-// Socket.IO connection events
 io.on('connection', socket => {
-  console.log('✅ Socket connected');
+  console.log(`Socket connected: ${socket.id}`);
+
+  socket.on('admin:join', ({ streamId }) => {
+    socket.join(`stream:${streamId}`);
+    socket.data.role = 'admin';
+    socket.data.streamId = streamId;
+    console.log(`Admin joined stream:${streamId}`);
+  });
+
+  socket.on('viewer:join', ({ streamId }) => {
+    socket.join(`stream:${streamId}`);
+    socket.data.role = 'viewer';
+    socket.data.streamId = streamId;
+    console.log(`Viewer joined stream:${streamId}`);
+
+    // Notify admin
+    socket.to(`stream:${streamId}`).emit('viewer:joined', {
+      viewerId: socket.id,
+    });
+  });
+
+  // WebRTC signaling
+  socket.on('signal:admin-to-viewer', ({ viewerId, signal }) => {
+    io.to(viewerId).emit('signal:from-admin', { signal });
+  });
+
+  socket.on('signal:viewer-to-admin', ({ streamId, signal }) => {
+    socket.to(`stream:${streamId}`).emit('signal:from-viewer', {
+      viewerId: socket.id,
+      signal,
+    });
+  });
+
+  socket.on('leave-stream', () => {
+    const streamId = socket.data.streamId;
+    if (streamId) socket.leave(`stream:${streamId}`);
+  });
 
   socket.on('disconnect', () => {
-    console.log('❌ Socket disconnected');
+    const streamId = socket.data.streamId;
+    if (streamId && socket.data.role === 'admin') {
+      socket.to(`stream:${streamId}`).emit('admin:disconnected');
+    }
   });
 });
 
-// CORS
-const allowedOrigins = [process.env.FRONTEND_URL || 'http://localhost:5173'];
-
+// ---------------- Middleware ----------------
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
-
-// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-
-// Sessions
 app.use(
   session({
     secret: process.env.SESSION_SECRET || 'your-secret-key',
     resave: false,
     saveUninitialized: false,
-    store: MongoStore.create({
-      mongoUrl: process.env.DB_CONNECT,
-      collectionName: 'sessions',
-      ttl: 14 * 24 * 60 * 60,
-    }),
-    cookie: {
-      httpOnly: true,
-      secure: false,
-      maxAge: 1000 * 60 * 60 * 24,
-    },
+    store: MongoStore.create({ mongoUrl: process.env.DB_CONNECT }),
+    cookie: { maxAge: 1000 * 60 * 60 * 24 },
   })
 );
 
-// Flash
-app.use(flash());
-
-app.get('/', (req, res) => {
-  const redirectUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-  return res.redirect(redirectUrl);
-});
-
-// Routes
+// ---------------- Routes ----------------
 app.use('/api/users', userRoutes);
 app.use('/api/admins', adminRoutes);
+app.use('/api/streams', streamRoutes);
+
+app.get('/', (req, res) => {
+  res.json({ success: true, message: 'API is running 🚀' });
+});
 
 module.exports = { app, server };

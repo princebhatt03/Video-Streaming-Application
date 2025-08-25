@@ -1,8 +1,9 @@
 const jwt = require('jsonwebtoken');
-const Admin = require('../models/admin.model'); 
+const Admin = require('../models/admin.model');
+const User = require('../models/user.model'); // ✅ add user model if needed
 
-// Middleware to verify admin JWT
-const verifyAdminToken = async (req, res, next) => {
+// Middleware to verify token (for both user & admin)
+const auth = async (req, res, next) => {
   try {
     // Get token from Authorization header
     const authHeader = req.headers.authorization;
@@ -20,21 +21,47 @@ const verifyAdminToken = async (req, res, next) => {
 
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'mysecretkey');
-    const admin = await Admin.findById(decoded.id).select('-password');
 
-    if (!admin) {
-      return res
-        .status(401)
-        .json({ success: false, message: 'Admin not found' });
+    let account = null;
+
+    // Check if it's an Admin
+    account = await Admin.findById(decoded.id).select('-password');
+    if (account) {
+      req.user = { ...account._doc, role: 'admin' }; // ✅ attach admin with role
+      return next();
     }
 
-    // Attach admin info to request
-    req.admin = admin;
-    next();
+    // Else check User
+    account = await User.findById(decoded.id).select('-password');
+    if (account) {
+      req.user = { ...account._doc, role: 'user' }; // ✅ attach user with role
+      return next();
+    }
+
+    return res
+      .status(401)
+      .json({ success: false, message: 'Account not found' });
   } catch (err) {
     console.error('Auth Middleware Error:', err.message);
     res.status(401).json({ success: false, message: 'Unauthorized' });
   }
 };
 
-module.exports = verifyAdminToken;
+// Role-based access
+const requireRole = role => {
+  return (req, res, next) => {
+    try {
+      if (!req.user || req.user.role !== role) {
+        return res
+          .status(403)
+          .json({ success: false, message: 'Forbidden: Insufficient rights' });
+      }
+      next();
+    } catch (err) {
+      console.error('Role Middleware Error:', err.message);
+      return res.status(403).json({ success: false, message: 'Forbidden' });
+    }
+  };
+};
+
+module.exports = { auth, requireRole };

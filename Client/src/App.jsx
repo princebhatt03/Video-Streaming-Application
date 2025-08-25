@@ -12,12 +12,14 @@ import UserHome from './pages/user/UserHome';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminRegister from './pages/admin/AdminRegister';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import LiveWatch from './pages/user/LiveWatch';
+import Recordings from './pages/user/Recordings';
 
 const App = () => {
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    // connect socket.io client
+    // ✅ Connect socket.io client once
     const newSocket = io(
       import.meta.env.VITE_API_URL || 'http://localhost:3000',
       {
@@ -27,7 +29,7 @@ const App = () => {
 
     setSocket(newSocket);
 
-    // Listen for connect/disconnect
+    // ✅ Listen for connect/disconnect
     newSocket.on('connect', () => {
       console.log('✅ Connected to socket server:', newSocket.id);
     });
@@ -36,23 +38,32 @@ const App = () => {
       console.log('❌ Disconnected from socket server');
     });
 
-    // Example: listen for custom server events
+    // Example: custom server event
     newSocket.on('server-message', data => {
       console.log('📩 Message from server:', data);
     });
 
-    // cleanup
+    // ✅ Cleanup
     return () => {
       newSocket.disconnect();
     };
   }, []);
 
+  if (!socket) {
+    // Optional: Loading state until socket connects
+    return (
+      <div className="flex h-screen items-center justify-center">
+        Connecting...
+      </div>
+    );
+  }
+
   return (
     <>
-      {/* Global Toast Notifications */}
+      {/* ✅ Global Toast Notifications */}
       <Toaster position="top-center" />
 
-      {/* Routes */}
+      {/* ✅ Routes */}
       <Routes>
         <Route
           path="/"
@@ -69,6 +80,14 @@ const App = () => {
         <Route
           path="/login"
           element={<UserLogin socket={socket} />}
+        />
+        <Route
+          path="/live/:id"
+          element={<LiveWatch socket={socket} />}
+        />
+        <Route
+          path="/recordings"
+          element={<Recordings />}
         />
         <Route
           path="/admin-login"
