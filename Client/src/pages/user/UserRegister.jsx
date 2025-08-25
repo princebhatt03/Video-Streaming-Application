@@ -42,7 +42,7 @@ const UserRegister = () => {
         toast.error(data.message);
       }
     } catch (err) {
-      // ✅ Show Mongoose validation errors from backend
+      // Show Mongoose validation errors from backend
       const msg = err?.response?.data?.message || 'Something went wrong';
       toast.error(msg);
     } finally {
@@ -56,7 +56,7 @@ const UserRegister = () => {
       <div className="flex items-center justify-center min-h-screen bg-gray-50 px-4">
         <div className="w-full max-w-md bg-white shadow-lg rounded-2xl p-8">
           <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
-            Create Account
+            Register as a User
           </h2>
           <form
             onSubmit={handleSubmit}
@@ -100,6 +100,22 @@ const UserRegister = () => {
               {loading ? 'Registering...' : 'Register'}
             </button>
           </form>
+          <p className="text-sm text-center text-gray-600 mt-4">
+            Login as a User{' '}
+            <span
+              className="text-blue-600 cursor-pointer hover:underline"
+              onClick={() => navigate('/login')}>
+              Login here
+            </span>
+          </p>
+          <p className="text-sm text-center text-gray-600 mt-4">
+            Register as a Admin{' '}
+            <span
+              className="text-blue-600 cursor-pointer hover:underline"
+              onClick={() => navigate('/admin-register')}>
+              Register here
+            </span>
+          </p>
         </div>
       </div>
     </>

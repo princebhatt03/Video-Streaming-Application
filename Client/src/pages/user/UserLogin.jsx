@@ -59,7 +59,7 @@ const UserLogin = () => {
       <div className="flex items-center justify-center min-h-screen bg-gray-50 px-4">
         <div className="w-full max-w-md bg-white shadow-lg rounded-2xl p-8">
           <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
-            Login
+            Login as a User
           </h2>
 
           <form
@@ -100,6 +100,14 @@ const UserLogin = () => {
               className="text-blue-600 cursor-pointer hover:underline"
               onClick={() => navigate('/register')}>
               Register here
+            </span>
+          </p>
+          <p className="text-sm text-center text-gray-600 mt-4">
+            Login as a Admin{' '}
+            <span
+              className="text-blue-600 cursor-pointer hover:underline"
+              onClick={() => navigate('/admin-login')}>
+              Login here
             </span>
           </p>
         </div>

@@ -1,4 +1,3 @@
-// models/user.model.js
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
@@ -32,11 +31,11 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: true,
       minlength: 6,
-      select: false, // never return by default
+      select: false,
     },
     roles: {
       type: [String],
-      default: ['user'], // can include 'admin'
+      default: ['user'],
     },
   },
   { timestamps: true }

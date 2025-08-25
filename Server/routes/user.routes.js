@@ -1,4 +1,3 @@
-// routes/user.routes.js
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -50,7 +49,7 @@ router.post('/register', async (req, res) => {
   } catch (err) {
     console.error('Register Error:', err);
 
-    // ✅ Check for Mongoose validation errors
+    // Check for Mongoose validation errors
     if (err.name === 'ValidationError') {
       const messages = Object.values(err.errors)
         .map(e => e.message)
