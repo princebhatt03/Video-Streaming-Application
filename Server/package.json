@@ -9,12 +9,14 @@
   "author": "Prince Bhatt",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^3.0.2",
     "connect-mongo": "^5.1.0",
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "express-flash": "^0.0.2",
     "express-session": "^1.18.2",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.18.0",
     "socket.io": "^4.8.1"
   }

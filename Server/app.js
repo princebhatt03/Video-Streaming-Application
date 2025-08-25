@@ -10,6 +10,8 @@ const fs = require('fs');
 const http = require('http');
 const { Server } = require('socket.io');
 const connectToDb = require('./db/db');
+const userRoutes = require('./routes/user.routes');
+const adminRoutes = require('./routes/admin.routes');
 
 connectToDb();
 const app = express();
@@ -81,5 +83,9 @@ app.get('/', (req, res) => {
   const redirectUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
   return res.redirect(redirectUrl);
 });
+
+// Routes
+app.use('/api/users', userRoutes);
+app.use('/api/admins', adminRoutes);
 
 module.exports = { app, server };
