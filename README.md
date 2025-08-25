@@ -30,7 +30,7 @@ Other Tools: Axios, TailwindCSS (optional for styling)
 
 ## 📦 Installation
 
-Server
+### Server
 ```
 # Clone repository
 git clone <repo-url>
@@ -48,9 +48,9 @@ node server.js
 Server runs on: http://localhost:3000
 ```
 
-Frontend (React)
+### Client
 ```
-cd frontend
+cd Client
 npm install
 npm run dev
 Frontend runs on: http://localhost:5173
@@ -58,7 +58,7 @@ Frontend runs on: http://localhost:5173
 
 ### 🌐 Environment Variables Setup
 
-### 🔒 Backend: `backend/.env`
+### 🔒 Server: `Server/.env`
 ```env
 DB_CONNECT=your_mongodb_connection_link
 PORT=3000
@@ -72,7 +72,7 @@ CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
 CLOUDINARY_API_KEY=your_cloudinary_api_key
 CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 ```
-### 🎯 Frontend: `frontend/.env`
+### 🎯 Client: `Client/.env`
 ```env
 VITE_API_URL=your_backend_url
 ```
@@ -130,7 +130,7 @@ WebRTC works best in modern browsers like Chrome, Edge, Firefox.
 
 ## 📌 Dependencies
 
-### Frontend
+### Client
 ```
 "dependencies": {
   "react": "^18.2.0",
@@ -141,7 +141,7 @@ WebRTC works best in modern browsers like Chrome, Edge, Firefox.
 }
 ```
 
-### Backend
+### Server
 ```
 "dependencies": {
   "express": "^4.18.2",
