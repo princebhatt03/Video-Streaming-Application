@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Header from '../../components/user/Header';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
@@ -24,7 +25,7 @@ const UserHome = ({ socket }) => {
   useEffect(() => {
     loadLive();
 
-    if (!socket) return; // ✅ Prevent error when socket is null
+    if (!socket) return;
 
     socket.on('stream:started', s => {
       toast.success(`🔴 ${s.admin.fullName} started: ${s.title}`);
@@ -40,50 +41,66 @@ const UserHome = ({ socket }) => {
       socket.off('stream:started');
       socket.off('stream:ended');
     };
-  }, [socket]); // ✅ re-run only when socket changes
+  }, [socket]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-gray-800 text-white px-4 py-3">User Home</header>
+    <>
+      <Header />
+      <div className="min-h-screen bg-gray-50">
+        <header className="bg-gray-800 text-white px-4 py-3 flex items-center justify-between">
+          <span className="font-semibold">Recordings</span>
+          <button
+            onClick={() => window.location.reload()}
+            className="text-sm bg-white/10 hover:bg-white/20 px-3 py-1 rounded">
+            Refresh
+          </button>
+        </header>
+        <main
+          className="mx-auto max-w-5xl px-4"
+          style={{ minHeight: 'calc(100vh - 3rem)' }}>
+          <div className="py-6">
+            <h2 className="text-xl font-semibold mb-4">Live Now</h2>
+            {live.length === 0 && (
+              <p className="text-gray-600">No live streams right now.</p>
+            )}
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {live.map(s => (
+                <div
+                  key={s._id || s.id}
+                  className="bg-white rounded-2xl shadow p-4">
+                  <p className="text-sm text-red-600 font-medium mb-1">
+                    ● LIVE
+                  </p>
+                  <h3 className="font-semibold">{s.title}</h3>
+                  <p className="text-gray-600 text-sm">{s.description}</p>
+                  <p className="text-xs text-gray-500 mt-2">
+                    By {s.admin?.fullName} ({s.admin?.adminId})
+                  </p>
+                  <button
+                    onClick={() => navigate(`/live/${s._id || s.id}`)}
+                    className="mt-3 w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-2 text-sm">
+                    Watch
+                  </button>
+                </div>
+              ))}
+            </div>
 
-      <main
-        className="mx-auto max-w-5xl px-4"
-        style={{ minHeight: 'calc(100vh - 3rem)' }}>
-        <div className="py-6">
-          <h2 className="text-xl font-semibold mb-4">Live Now</h2>
-          {live.length === 0 && (
-            <p className="text-gray-600">No live streams right now.</p>
-          )}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {live.map(s => (
-              <div
-                key={s._id || s.id}
-                className="bg-white rounded-2xl shadow p-4">
-                <p className="text-sm text-red-600 font-medium mb-1">● LIVE</p>
-                <h3 className="font-semibold">{s.title}</h3>
-                <p className="text-gray-600 text-sm">{s.description}</p>
-                <p className="text-xs text-gray-500 mt-2">
-                  By {s.admin?.fullName} ({s.admin?.adminId})
-                </p>
-                <button
-                  onClick={() => navigate(`/live/${s._id || s.id}`)}
-                  className="mt-3 w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-2 text-sm">
-                  Watch
-                </button>
-              </div>
-            ))}
+            <div className="mt-8 flex gap-4 justify-between">
+              <button
+                onClick={() => navigate('/recordings')}
+                className="bg-gray-800 text-white px-4 py-2 rounded-lg">
+                View Recordings
+              </button>
+              <button
+                onClick={() => navigate('/')}
+                className="bg-gray-800 text-white px-4 py-2 rounded-lg">
+                Go Back to Home
+              </button>
+            </div>
           </div>
-
-          <div className="mt-8">
-            <button
-              onClick={() => navigate('/recordings')}
-              className="bg-gray-800 text-white px-4 py-2 rounded-lg">
-              View Recordings
-            </button>
-          </div>
-        </div>
-      </main>
-    </div>
+        </main>
+      </div>
+    </>
   );
 };
 

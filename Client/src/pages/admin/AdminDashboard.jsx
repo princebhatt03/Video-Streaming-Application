@@ -20,7 +20,7 @@ const AdminDashboard = ({ socket }) => {
 
   const localVideoRef = useRef(null);
   const mediaStreamRef = useRef(null);
-  const peersRef = useRef({}); // { viewerSocketId: peer }
+  const peersRef = useRef({});
 
   const recorderRef = useRef(null);
   const recordedChunksRef = useRef([]);
@@ -88,7 +88,7 @@ const AdminDashboard = ({ socket }) => {
       recorder.onstart = () => toast.success('Recording started');
       recorder.onerror = e => toast.error('Recording error');
 
-      recorder.start(1000); // chunk every second
+      recorder.start(1000);
     } catch (err) {
       toast.error('Could not start recording');
       console.error(err);
@@ -149,7 +149,6 @@ const AdminDashboard = ({ socket }) => {
 
       await startMedia();
 
-      // Notify viewers
       socket.emit('admin:join', { streamId: s._id });
       socket.emit('admin:started', { streamId: s._id, title: s.title });
 
@@ -176,7 +175,7 @@ const AdminDashboard = ({ socket }) => {
         if (peer) peer.signal(signal);
       };
       signalViewerHandlerRef.current = onSignalViewer;
-      socket.on('signal:viewer-to-admin', onSignalViewer); // <-- Fixed event
+      socket.on('signal:viewer-to-admin', onSignalViewer);
 
       startRecording();
       toast.success('Live stream started');
