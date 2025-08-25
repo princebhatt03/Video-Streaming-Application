@@ -2,6 +2,10 @@
 
 A real-time live streaming application built with React, Socket.IO, and WebRTC (SimplePeer). It allows an admin to broadcast a live video to multiple viewers, who can watch the stream in real-time through their browser. The admin can also record the stream automatically.
 
+## Live Netlify Link:
+
+- **Website**: [Video Streaming Application Live](https://video-streaming-application-prince.netlify.app)
+
 ## 🚀 Features
 
 Admin Dashboard: Start/stop live streams, preview camera feed, and broadcast to viewers.
@@ -56,22 +60,21 @@ Frontend runs on: http://localhost:5173
 
 ### 🔒 Backend: `backend/.env`
 ```env
+DB_CONNECT=your_mongodb_connection_link
 PORT=3000
-DB_CONNECT=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret
-JWT_TIMEOUT=1d
-FRONTEND_URL=your_frontend_URL
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
-RAZORPAY_KEY_ID=your_razorpay_id
-RAZORPAY_KEY_SECRET=your_razorpay_secret
-GEMINI_API_KEY=your_gemini_api_key
+FRONTEND_URL=your_frontend_url
+SESSION_SECRET=your_session_secret
+JWT_SECRET=supersecret_for_jwt
+JWT_EXPIRES=7d
+COOKIE_NAME=token
+NODE_ENV=development
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 ```
 ### 🎯 Frontend: `frontend/.env`
 ```env
-VITE_BACKEND_URL=http://localhost:3000
-VITE_GOOGLE_CLIENT_ID=your_google_client_id
-VITE_RAZORPAY_KEY_ID=your_razorpay_id
+VITE_API_URL=your_backend_url
 ```
 
 ## 🎬 How to Use
