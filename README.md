@@ -80,7 +80,7 @@ VITE_API_URL=your_backend_url
 ## 🎬 How to Use
 ### Admin
 
-Go to http://localhost:5173/admin.
+Go to http://localhost:5173/admin-dashboard.
 
 Enter a Stream ID (unique identifier for this live session).
 
