@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { io } from 'socket.io-client';
+
 // Pages
 import HomePage from './pages/HomePage';
 import ErrorPage from './pages/ErrorPage';
@@ -12,6 +14,39 @@ import AdminRegister from './pages/admin/AdminRegister';
 import AdminDashboard from './pages/admin/AdminDashboard';
 
 const App = () => {
+  const [socket, setSocket] = useState(null);
+
+  useEffect(() => {
+    // connect socket.io client
+    const newSocket = io(
+      import.meta.env.VITE_API_URL || 'http://localhost:3000',
+      {
+        withCredentials: true,
+      }
+    );
+
+    setSocket(newSocket);
+
+    // Listen for connect/disconnect
+    newSocket.on('connect', () => {
+      console.log('✅ Connected to socket server:', newSocket.id);
+    });
+
+    newSocket.on('disconnect', () => {
+      console.log('❌ Disconnected from socket server');
+    });
+
+    // Example: listen for custom server events
+    newSocket.on('server-message', data => {
+      console.log('📩 Message from server:', data);
+    });
+
+    // cleanup
+    return () => {
+      newSocket.disconnect();
+    };
+  }, []);
+
   return (
     <>
       {/* Global Toast Notifications */}
@@ -21,31 +56,31 @@ const App = () => {
       <Routes>
         <Route
           path="/"
-          element={<HomePage />}
+          element={<HomePage socket={socket} />}
         />
         <Route
           path="/user-home"
-          element={<UserHome />}
+          element={<UserHome socket={socket} />}
         />
         <Route
           path="/register"
-          element={<UserRegister />}
+          element={<UserRegister socket={socket} />}
         />
         <Route
           path="/login"
-          element={<UserLogin />}
+          element={<UserLogin socket={socket} />}
         />
         <Route
           path="/admin-login"
-          element={<AdminLogin />}
+          element={<AdminLogin socket={socket} />}
         />
         <Route
           path="/admin-register"
-          element={<AdminRegister />}
+          element={<AdminRegister socket={socket} />}
         />
         <Route
           path="/admin-dashboard"
-          element={<AdminDashboard />}
+          element={<AdminDashboard socket={socket} />}
         />
         <Route
           path="*"
