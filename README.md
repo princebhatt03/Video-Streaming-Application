@@ -31,8 +31,8 @@ Other Tools: Axios, TailwindCSS (optional for styling)
 ## 📦 Installation
 
 ### Server
-```
 # Clone repository
+```
 git clone <repo-url>
 cd Server
 ```
