@@ -24,10 +24,12 @@ router.post('/start', auth, requireRole('admin'), async (req, res) => {
     const { title, description } = req.body;
     const admin = req.user;
 
-    if (!admin || !admin._id)
-      return res
-        .status(500)
-        .json({ success: false, message: 'Admin info missing' });
+    if (!admin || !admin._id) {
+      return res.status(500).json({
+        success: false,
+        message: 'Admin info missing',
+      });
+    }
 
     const newStream = new LiveStream({
       title,
@@ -44,9 +46,17 @@ router.post('/start', auth, requireRole('admin'), async (req, res) => {
 
     const savedStream = await newStream.save();
 
-    // Emit socket event to all viewers
+    // ✅ Emit socket event to all viewers when stream starts
     const io = req.app.get('io');
-    io.emit('admin:started', { streamId: savedStream._id });
+    if (io) {
+      io.emit('admin:started', {
+        streamId: savedStream._id,
+        title: savedStream.title,
+        description: savedStream.description,
+        startedAt: savedStream.startedAt,
+      });
+      console.log('📡 Event emitted: admin:started');
+    }
 
     res.json({ success: true, stream: savedStream });
   } catch (err) {
@@ -68,19 +78,22 @@ router.post(
     try {
       const { id } = req.params;
       const stream = await LiveStream.findById(id);
-      if (!stream)
+      if (!stream) {
         return res
           .status(404)
           .json({ success: false, message: 'Stream not found' });
+      }
 
-      if (!req.file)
+      if (!req.file) {
         return res
           .status(400)
           .json({ success: false, message: 'No file uploaded' });
+      }
 
       // Only admin who started can upload
-      if (String(stream.admin.id) !== String(req.user._id))
+      if (String(stream.admin.id) !== String(req.user._id)) {
         return res.status(403).json({ success: false, message: 'Forbidden' });
+      }
 
       stream.recordingUrl = req.file.path;
       await stream.save();
@@ -98,20 +111,30 @@ router.post('/end/:id', auth, requireRole('admin'), async (req, res) => {
   try {
     const { id } = req.params;
     const stream = await LiveStream.findById(id);
-    if (!stream)
+    if (!stream) {
       return res
         .status(404)
         .json({ success: false, message: 'Stream not found' });
+    }
 
-    if (String(stream.admin.id) !== String(req.user._id))
+    if (String(stream.admin.id) !== String(req.user._id)) {
       return res.status(403).json({ success: false, message: 'Forbidden' });
+    }
 
     stream.status = 'ended';
     stream.endedAt = new Date();
     await stream.save();
 
+    // ✅ Emit socket event to all viewers when stream ends
     const io = req.app.get('io');
-    io.emit('admin:ended', { streamId: stream._id });
+    if (io) {
+      io.emit('admin:ended', {
+        streamId: stream._id,
+        title: stream.title,
+        endedAt: stream.endedAt,
+      });
+      console.log('📡 Event emitted: admin:ended');
+    }
 
     res.json({ success: true, stream });
   } catch (err) {
@@ -133,7 +156,7 @@ router.get('/live', async (req, res) => {
   }
 });
 
-// ======================== GET RECORDINGS ========================
+// ---------------- GET RECORDINGS ----------------
 router.get('/recordings', async (req, res) => {
   try {
     const streams = await LiveStream.find({ status: 'ended' }).sort({

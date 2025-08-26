@@ -111,7 +111,7 @@ const Recordings = () => {
           </div>
         </main>
       </div>
-      <div className="flex gap-4 mt-4">
+      <div className="p-4 flex justify-between items-center">
         <button
           onClick={() => navigate('/user-home')}
           className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition duration-300">
