@@ -45,16 +45,18 @@ const UserHome = ({ socket }) => {
     if (!newStream) return;
     const id = newStream._id || newStream.streamId || newStream.id;
     setLive(prev => {
-      const exists = prev.some(s => (s._id || s.id) === id);
+      const exists = prev.some(s => (s._id || s.streamId || s.id) === id);
       if (exists) {
-        return prev.map(s => ((s._id || s.id) === id ? newStream : s));
+        return prev.map(s =>
+          (s._id || s.streamId || s.id) === id ? newStream : s
+        );
       }
       return [newStream, ...prev];
     });
   };
 
   const removeStreamSafely = id => {
-    setLive(prev => prev.filter(s => (s._id || s.id) !== id));
+    setLive(prev => prev.filter(s => (s._id || s.streamId || s.id) !== id));
   };
 
   useEffect(() => {
@@ -76,7 +78,7 @@ const UserHome = ({ socket }) => {
 
     const onAdminStarted = s => {
       console.log('📣 Event received: admin:started', s);
-      toast.success(`${s?.title + ' Stream' || 'Live Stream'} started`);
+      toast.success(`${s?.title || 'Live Stream'} started`);
       addStreamSafely(s);
     };
 
@@ -138,26 +140,29 @@ const UserHome = ({ socket }) => {
               <p className="text-gray-600">No live streams right now.</p>
             ) : (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {live.map(s => (
-                  <div
-                    key={s._id || s.id}
-                    className="bg-white rounded-2xl shadow p-4">
-                    <p className="text-sm text-red-600 font-medium mb-1">
-                      ● LIVE
-                    </p>
-                    <h3 className="font-semibold">{s.title}</h3>
-                    <p className="text-gray-600 text-sm">{s.description}</p>
-                    <p className="text-xs text-gray-500 mt-2">
-                      By {s.admin?.fullName || 'Unknown'} (
-                      {s.admin?.adminId || '—'})
-                    </p>
-                    <button
-                      onClick={() => navigate(`/live/${s._id || s.id}`)}
-                      className="mt-3 w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-2 text-sm">
-                      Watch
-                    </button>
-                  </div>
-                ))}
+                {live.map(s => {
+                  const streamId = s._id || s.streamId || s.id; // ✅ fix undefined
+                  return (
+                    <div
+                      key={streamId}
+                      className="bg-white rounded-2xl shadow p-4">
+                      <p className="text-sm text-red-600 font-medium mb-1">
+                        ● LIVE
+                      </p>
+                      <h3 className="font-semibold">{s.title}</h3>
+                      <p className="text-gray-600 text-sm">{s.description}</p>
+                      <p className="text-xs text-gray-500 mt-2">
+                        By {s.admin?.fullName || 'Unknown'} (
+                        {s.admin?.adminId || '—'})
+                      </p>
+                      <button
+                        onClick={() => navigate(`/live/${streamId}`)}
+                        className="mt-3 w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-2 text-sm">
+                        Watch
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             )}
 

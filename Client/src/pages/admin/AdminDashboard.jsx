@@ -149,11 +149,15 @@ const AdminDashboard = ({ socket }) => {
 
       await startMedia();
 
+      // Notify viewers/admin events
       socket.emit('admin:join', { streamId: s._id });
       socket.emit('admin:started', { streamId: s._id, title: s.title });
 
       // ------------------- HANDLE VIEWERS -------------------
       const onViewerJoined = ({ viewerId }) => {
+        if (peersRef.current[viewerId]) return;
+
+        // Create a peer and attach current media stream
         const peer = new SimplePeer({
           initiator: true,
           trickle: false,
@@ -161,9 +165,10 @@ const AdminDashboard = ({ socket }) => {
         });
         peersRef.current[viewerId] = peer;
 
-        peer.on('signal', signal =>
-          socket.emit('signal:admin-to-viewer', { viewerId, signal })
-        );
+        peer.on('signal', signal => {
+          socket.emit('signal:admin-to-viewer', { viewerId, signal });
+        });
+
         peer.on('error', err => console.error('Peer error:', err));
         peer.on('close', () => delete peersRef.current[viewerId]);
       };

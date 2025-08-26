@@ -88,7 +88,7 @@ const UserRegister = () => {
             <input
               type="password"
               name="password"
-              placeholder="Password"
+              placeholder="Password (Maximum 6 characters long)"
               value={form.password}
               onChange={handleChange}
               className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"

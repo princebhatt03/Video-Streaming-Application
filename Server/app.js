@@ -28,7 +28,6 @@ const io = new Server(server, {
   },
 });
 
-// Attach io to app for route access if needed
 app.set('io', io);
 
 io.on('connection', socket => {
@@ -57,14 +56,14 @@ io.on('connection', socket => {
 
   // ---------------- WebRTC signaling ----------------
   socket.on('signal:admin-to-viewer', ({ viewerId, signal }) => {
-    io.to(viewerId).emit('signal:from-admin', { signal });
+    io.to(viewerId).emit('signal:admin-to-viewer', { signal }); 
   });
 
   socket.on('signal:viewer-to-admin', ({ streamId, signal }) => {
-    socket.to(`stream:${streamId}`).emit('signal:from-viewer', {
+    socket.to(`stream:${streamId}`).emit('signal:viewer-to-admin', {
       viewerId: socket.id,
       signal,
-    });
+    }); // match admin listener
   });
 
   // ---------------- Handle leave ----------------
@@ -74,7 +73,6 @@ io.on('connection', socket => {
       socket.leave(`stream:${streamId}`);
       console.log(`🚪 ${socket.data.role} left stream:${streamId}`);
 
-      // If viewer leaves, notify admin
       if (socket.data.role === 'viewer') {
         socket.to(`stream:${streamId}`).emit('viewer:left', {
           viewerId: socket.id,
@@ -92,10 +90,8 @@ io.on('connection', socket => {
 
     if (streamId) {
       if (socket.data.role === 'admin') {
-        // Notify viewers that admin disconnected
         socket.to(`stream:${streamId}`).emit('admin:disconnected');
       } else if (socket.data.role === 'viewer') {
-        // Notify admin that viewer left
         socket.to(`stream:${streamId}`).emit('viewer:left', {
           viewerId: socket.id,
         });
@@ -121,10 +117,10 @@ app.use(
     saveUninitialized: false,
     store: MongoStore.create({
       mongoUrl: process.env.DB_CONNECT,
-      ttl: 14 * 24 * 60 * 60, // Session TTL = 14 days
+      ttl: 14 * 24 * 60 * 60,
     }),
     cookie: {
-      maxAge: 1000 * 60 * 60 * 24, // 1 day
+      maxAge: 1000 * 60 * 60 * 24,
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
     },

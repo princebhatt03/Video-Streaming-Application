@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import SimplePeer from 'simple-peer';
 import { toast } from 'react-hot-toast';
 import { Buffer } from 'buffer';
@@ -8,62 +8,60 @@ window.Buffer = Buffer;
 
 const LiveWatch = ({ socket }) => {
   const navigate = useNavigate();
+  const { id } = useParams(); // ✅ Extract streamId from URL
   const videoRef = useRef(null);
   const peerRef = useRef(null);
   const [liveStreamId, setLiveStreamId] = useState(null);
 
   useEffect(() => {
     if (!socket) return;
+    if (!id) {
+      toast.error('Invalid stream ID');
+      navigate('/user-home');
+      return;
+    }
 
-    // ---------------- Admin started live stream ----------------
-    const handleAdminStarted = ({ streamId }) => {
-      if (!streamId) return;
-      setLiveStreamId(streamId);
+    setLiveStreamId(id);
 
-      if (!peerRef.current) {
-        // Create SimplePeer for viewer
-        const peer = new SimplePeer({ initiator: false, trickle: false });
-        peerRef.current = peer;
+    // --- Create SimplePeer for viewer ---
+    const peer = new SimplePeer({ initiator: false, trickle: false });
+    peerRef.current = peer;
 
-        // Send viewer signal to admin
-        peer.on('signal', signal => {
-          socket.emit('signal:viewer-to-admin', {
-            viewerId: socket.id,
-            streamId,
-            signal,
-          });
-        });
+    // Send viewer signal to admin
+    peer.on('signal', signal => {
+      socket.emit('signal:viewer-to-admin', {
+        viewerId: socket.id,
+        streamId: id,
+        signal,
+      });
+    });
 
-        // Receive remote stream from admin
-        peer.on('stream', remoteStream => {
-          if (videoRef.current) {
-            videoRef.current.srcObject = remoteStream;
-            videoRef.current
-              .play()
-              .catch(() => console.warn('Autoplay blocked'));
-            toast.success('Connected to live stream 🎥');
-          }
-        });
-
-        peer.on('error', err => console.error('Peer error:', err));
+    // Receive remote stream from admin
+    peer.on('stream', remoteStream => {
+      if (videoRef.current) {
+        videoRef.current.srcObject = remoteStream;
+        videoRef.current.play().catch(() => console.warn('Autoplay blocked'));
+        toast.success('Connected to live stream 🎥');
       }
+    });
 
-      // Join the live stream room
-      socket.emit('viewer:join', { viewerId: socket.id, streamId });
-    };
-    socket.on('admin:started', handleAdminStarted);
+    peer.on('error', err => console.error('Peer error:', err));
 
-    // ---------------- Receive signals from admin ----------------
-    const handleSignalFromAdmin = ({ streamId, signal }) => {
-      if (peerRef.current && streamId === liveStreamId) {
+    // --- Notify admin that viewer joined ---
+    socket.emit('viewer:join', { viewerId: socket.id, streamId: id });
+    console.log('👀 Viewer joined stream:', id);
+
+    // --- Listen for signals from admin ---
+    const handleSignalFromAdmin = ({ streamId: sid, signal }) => {
+      if (peerRef.current && sid === id) {
         peerRef.current.signal(signal);
       }
     };
     socket.on('signal:admin-to-viewer', handleSignalFromAdmin);
 
-    // ---------------- Admin ended live stream ----------------
-    const handleAdminEnded = ({ streamId }) => {
-      if (streamId === liveStreamId) {
+    // --- Listen for admin ending stream ---
+    const handleAdminEnded = ({ streamId: sid }) => {
+      if (sid === id) {
         toast('Live stream has ended');
         peerRef.current?.destroy();
         peerRef.current = null;
@@ -73,15 +71,14 @@ const LiveWatch = ({ socket }) => {
     };
     socket.on('admin:ended', handleAdminEnded);
 
-    // ---------------- Cleanup ----------------
+    // --- Cleanup on unmount ---
     return () => {
-      socket.off('admin:started', handleAdminStarted);
-      socket.off('signal:admin-to-viewer', handleSignalFromAdmin);
-      socket.off('admin:ended', handleAdminEnded);
       peerRef.current?.destroy();
       peerRef.current = null;
+      socket.off('signal:admin-to-viewer', handleSignalFromAdmin);
+      socket.off('admin:ended', handleAdminEnded);
     };
-  }, [socket, liveStreamId, navigate]);
+  }, [socket, id, navigate]);
 
   return (
     <div className="min-h-screen bg-black">
