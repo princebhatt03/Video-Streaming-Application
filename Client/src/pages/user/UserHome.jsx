@@ -76,13 +76,13 @@ const UserHome = ({ socket }) => {
 
     const onAdminStarted = s => {
       console.log('📣 Event received: admin:started', s);
-      toast.success(`${s?.title || 'Live Stream'} started`);
+      toast.success(`${s?.title + ' Stream' || 'Live Stream'} started`);
       addStreamSafely(s);
     };
 
     const onAdminEnded = s => {
       console.log('📴 Event received: admin:ended', s);
-      toast(`Stream ended: ${s?.title || ''}`, { icon: '' });
+      toast.success(`Stream ended: ${s?.title || ''}`);
       removeStreamSafely(s.streamId || s._id || s.id);
     };
 

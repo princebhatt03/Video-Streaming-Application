@@ -7,7 +7,7 @@ function StreamListener() {
     // 🔌 Connection
     socket.on('connect', () => {
       console.log('✅ Socket connected with ID:', socket.id);
-      toast.success('Connected to live server ⚡');
+      // toast.success('Connected to live server ⚡');
     });
 
     socket.on('disconnect', reason => {
