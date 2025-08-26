@@ -21,10 +21,31 @@ Notifications: Toast notifications for stream events like start/end or errors.
 WebRTC Powered: Peer-to-peer streaming using simple-peer.
 
 ## 🛠 Tech Stack
-| Frontend        | Backend           | Streaming           | Database                               |
-| --------------- | ----------------- | ------------------- | -------------------------------------- |
-| React (Vite)    | Node.js + Express | SimplePeer (WebRTC) | Optional (MongoDB for storing streams) |
-| react-hot-toast | Socket.IO         | MediaRecorder API   | Optional                               |
+
+| Category                      | Technology / Tool                      | Description                                                                |
+| ----------------------------- | -------------------------------------- | -------------------------------------------------------------------------- |
+| **Frontend**                  | ⚛️ **React (Vite)**                    | Fast build tool and UI library for creating dynamic & responsive frontend. |
+|                               | 🎨 **Tailwind CSS**                    | Utility-first CSS framework for modern UI styling.                         |
+|                               | 🔥 **react-hot-toast**                 | Notifications and alerts for user interactions.                            |
+| **Backend**                   | 🟢 **Node.js**                         | JavaScript runtime for server-side execution.                              |
+|                               | 🚂 **Express.js**                      | Backend framework for APIs and routing.                                    |
+|                               | 🍪 **cookie-parser / express-session** | User authentication and session management.                                |
+|                               | 🔒 **JWT (JSON Web Tokens)**           | Token-based authentication system.                                         |
+| **Streaming & Real-time**     | 📹 **WebRTC (SimplePeer)**             | Peer-to-peer real-time video/audio streaming.                              |
+|                               | 🎙 **MediaRecorder API**               | Captures and records video/audio streams from the browser.                 |
+|                               | ⚡ **Socket.IO**                        | Real-time bi-directional communication between client and server.          |
+| **Database**                  | 🍃 **MongoDB Atlas**                   | Cloud database for storing users, streams, and metadata.                   |
+| **Media & Storage**           | ☁️ **Cloudinary**                      | Cloud-based service for storing and delivering video & image assets.       |
+| **Hosting & Deployment**      | 🚀 **Render**                          | Hosting backend server (Node.js + Express).                                |
+|                               | 🌐 **Netlify**                         | Hosting frontend React (Vite) application.                                 |
+| **DevOps & Tools**            | 🧪 **Postman**                         | API testing & debugging tool.                                              |
+|                               | 🐙 **GitHub**                          | Version control & collaboration platform.                                  |
+|                               | 🔄 **Git**                             | Distributed version control system.                                        |
+| **Authentication (Optional)** | 🔑 **Google OAuth** (if integrated)    | Social login and authentication support.                                   |
+| **Others**                    | 📂 **fs (File System)** (Node.js)      | Handling files & recordings locally on server.                             |
+|                               | 🛠 **dotenv**                          | Environment variable management.                                           |
+|                               | 🧩 **CORS**                            | Handling cross-origin requests securely.                                   |
+
 
 Other Tools: Axios, TailwindCSS (optional for styling)
 
